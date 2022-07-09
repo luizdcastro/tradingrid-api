@@ -42,8 +42,6 @@ exports.deleteBot = catchAsync(async (req, res, next) => {
 
 exports.updateBot = catchAsync(async (req, res, next) => {
 
-    console.log(req.body)
-
     await Bot.findByIdAndUpdate(req.params.id, req.body, {
         new: true,
         runValidators: true,

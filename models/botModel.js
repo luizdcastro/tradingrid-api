@@ -18,11 +18,11 @@ const botSchema = new mongoose.Schema(
             type: Boolean,
         },
         growth: {
-            type: Array,
+            type: Number,
             default: 0
         },
         profit: {
-            type: Array,
+            type: Number,
             default: 0
         },
         settings: {
@@ -50,6 +50,7 @@ const botSchema = new mongoose.Schema(
             }
         },
         toObject: { virtuals: true },
+        versionKey: false
     }
 )
 
@@ -57,16 +58,6 @@ botSchema.virtual('orders', {
     ref: 'orders',
     foreignField: 'bot',
     localField: '_id'
-})
-
-botSchema.post('findOneAndDelete', async function (doc) {
-    let ordersId = []
-    const orders = await Order.find({ bot: doc._id })
-    for (const item of orders) {
-        ordersId.push(item._id)
-    }
-
-    await Order.deleteMany({ _id: ordersId })
 })
 
 module.exports = mongoose.model('bots', botSchema)

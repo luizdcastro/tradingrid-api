@@ -36,6 +36,13 @@ userSchema.virtual('bots', {
     localField: '_id'
 })
 
+userSchema.virtual('orders', {
+    ref: 'orders',
+    foreignField: 'user',
+    localField: '_id'
+})
+
+
 const User = mongoose.model('users', userSchema)
 
 module.exports = User
