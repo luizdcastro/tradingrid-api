@@ -1,6 +1,7 @@
 const Exchange = require('../models/exchangeModel');
 const catchAsync = require('./../utils/catchAsync');
 const ccxt = require('ccxt')
+const { encrypt, fingerprint } = require('../utils/secrets')
 
 exports.createExchange = catchAsync(async (req, res, next) => {
 
@@ -9,9 +10,10 @@ exports.createExchange = catchAsync(async (req, res, next) => {
 
     let connected
 
-    const userApikey = await Exchange.findOne({ api_key })
+    // Keys saved before encryption are still matched by their plain value.
+    const userApikey = await Exchange.findOne({ $or: [{ api_key_hash: fingerprint(api_key) }, { api_key }] })
 
-    if (userApikey || userApikey?.exchange === exchange_converted) {
+    if (userApikey) {
         return res.status(400).send({ error: `The exchange is already connected` })
     }
 
@@ -33,8 +35,10 @@ exports.createExchange = catchAsync(async (req, res, next) => {
     await Exchange.create({
         exchange: exchange,
         user: user,
-        api_key: api_key,
-        secret_key: secret_key,
+        api_key: encrypt(api_key),
+        api_key_hash: fingerprint(api_key),
+        api_key_hint: api_key.slice(0, 9),
+        secret_key: encrypt(secret_key),
     })
 
     res.status(200).json({
